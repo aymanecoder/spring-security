@@ -1,5 +1,7 @@
 package com.project.springsecurity.api;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -16,11 +18,22 @@ import java.util.stream.Collectors;
 @RestController
 public class AuthController {
     private final JwtEncoder jwtEncoder;
-    public AuthController(JwtEncoder jwtEncoder) {
+    private final AuthenticationManager authenticationManager;
+    public AuthController(JwtEncoder jwtEncoder, AuthenticationManager authenticationManager) {
         this.jwtEncoder = jwtEncoder;
+        this.authenticationManager = authenticationManager;
     }
+
+
     @PostMapping("/token")
-    public Map<String,String> jwtToken(Authentication authentication) {
+    public Map<String,String> jwtToken(String username, String password) {
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password)
+        );
+
+
+
         Map<String,String> idToken =new HashMap<>();
         Instant instance = Instant.now();
         String scope = authentication.getAuthorities()
